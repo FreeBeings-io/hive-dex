@@ -1,6 +1,9 @@
-import datetime
+from datetime import datetime
 import decimal
 
+from hive_dex.config import Config
+
+config = Config.config
 
 UTC_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
@@ -28,3 +31,7 @@ def normalize_types(data):
     elif isinstance(data, dict):
         return _normalize(data)
     return data
+
+def schemafy(data:str):
+    _data = data.replace('hive_dex.', f"{config['schema']}.")
+    return _data
