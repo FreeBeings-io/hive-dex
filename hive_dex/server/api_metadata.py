@@ -21,7 +21,7 @@ LICENSE = {
 }
 
 
-# Tags for Plugs
+# Tags for Endpoints
 
 TAGS_METADATA = [
     {
