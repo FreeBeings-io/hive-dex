@@ -54,7 +54,7 @@ CREATE OR REPLACE PROCEDURE hive_dex.sync_main()
             _target INTEGER;
         BEGIN
             _op_ids := ARRAY [5,21,6,57,85];
-            _step := 10000;
+            _step := 1000;
             _global_start_block := (hive.app_get_irreversible_block()) - (30 * 24 * 60 * 20);
             SELECT latest_block_num INTO _latest_block_num FROM hive_dex.global_props;
 
@@ -88,7 +88,7 @@ CREATE OR REPLACE PROCEDURE hive_dex.sync_main()
                                 tv.trx_hash,
                                 ov.body::json
                             FROM hive.operations_view ov
-                            LEFT JOIN hive.transactions_view tv
+                            JOIN hive.transactions_view tv
                                 ON tv.block_num = ov.block_num
                                 AND tv.trx_in_block = ov.trx_in_block
                             WHERE ov.block_num >= _first_block
@@ -101,6 +101,8 @@ CREATE OR REPLACE PROCEDURE hive_dex.sync_main()
                                 temprow.trx_hash, temprow.body
                             );
                         END LOOP;
+                        -- prune
+                        PERFORM hive_dex.prune();
                         -- update global props and save
                         UPDATE hive_dex.global_props SET check_in = NOW(), latest_block_num = _last_block;
                         COMMIT;
@@ -124,6 +126,9 @@ CREATE OR REPLACE PROCEDURE hive_dex.process_op(op_id SMALLINT, _block_num INTEG
             ELSIF op_id = 21 THEN
                 -- limit_order_create2_operation
                 PERFORM hive_dex.limit_order_create2_operation(_block_num, _created, _hash, _body);
+            ELSIF op_id = 6 THEN
+                -- limit_order_cancel_operation
+                PERFORM hive_dex.limit_order_cancel_operation(_block_num, _created, _hash, _body);
             ELSIF op_id = 85 THEN
                 -- limit_order_cancelled_operation
                 PERFORM hive_dex.limit_order_cancelled_operation(_block_num, _created, _hash, _body);
