@@ -21,7 +21,9 @@ CREATE TABLE IF NOT EXISTS hive_dex.orders(
     hive BIGINT,
     settled BIGINT DEFAULT 0,
     fill_or_kill BOOLEAN,
-    expires TIMESTAMP
+    expires TIMESTAMP,
+    cancel_id BYTEA,
+    cancelled BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS hive_dex.trades(
