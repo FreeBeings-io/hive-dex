@@ -1,6 +1,14 @@
 # Hive DEX API
 
-Market data for the Hive blockchain's internal decentralized exchange
+
+<p align="center">
+  <img src="./logo.png" />
+</p>
+
+
+<p align="center">Market data for the Hive blockchain's internal decentralized exchange</p>
+
+---
 
 ## Production Deployment
 
