@@ -95,42 +95,40 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create2_operation( _block_num IN
         END;
     $function$;
 
+CREATE OR REPLACE FUNCTION hive_dex.limit_order_cancel_operation( _block_num INTEGER, _block_time TIMESTAMP, _trx_id BYTEA, _data JSON)
+    RETURNS void
+    LANGUAGE plpgsql
+    VOLATILE AS $function$
+        DECLARE
+            _acc VARCHAR(16);
+            _order_id BIGINT;
+        BEGIN
+
+            _acc := _data->'value'->>'owner';
+            _order_id := _data->'value'->'orderid';
+
+            UPDATE hive_dex.orders
+            SET cancel_id = _trx_id
+            WHERE acc = _acc
+                AND order_id = _order_id;
+
+        END;
+    $function$;
+
 CREATE OR REPLACE FUNCTION hive_dex.limit_order_cancelled_operation( _block_num INTEGER, _block_time TIMESTAMP, _trx_id BYTEA, _data JSON)
     RETURNS void
     LANGUAGE plpgsql
     VOLATILE AS $function$
         DECLARE
-            temprow RECORD;
             _acc VARCHAR(16);
-            _hbd BIGINT := 0;
-            _hive BIGINT := 0;
-            _side VARCHAR(1);
-
-            _amount_back BIGINT;
-            _amount_back_nai VARCHAR(11);
         BEGIN
 
             _acc := _data->'value'->>'seller';
-            _amount_back := _data->'value'->'amount_back'->>'amount';
-            _amount_back_nai := _data->'value'->'amount_back'->>'nai';
-            
-            IF _amount_back_nai = '@@000000013' THEN
-                _hbd := _amount_back;
-                --_hive := 0;
-                _side := 'b';
-            ELSIF _amount_back_nai = '@@000000021' THEN
-                _hive := _amount_back;
-                --_hbd := 0;
-                _side := 's';
-            END IF;
 
-            DELETE FROM hive_dex.orders
-            WHERE id IN (
-                SELECT id FROM hive_dex.orders
-                WHERE acc = _acc
-                AND side = _side
-                ORDER BY id
-            );
+            UPDATE hive_dex.orders
+            SET cancelled = true
+            WHERE acc = _acc
+                AND cancel_id = _trx_id;
 
         END;
     $function$;
@@ -222,6 +220,25 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
                 _block_num, _block_time, _trx_id, _current_owner,
                 _current_amount, _current_nai, _open_owner, _open_amount, _open_nai
             );
+
+        END;
+    $function$;
+
+CREATE OR REPLACE FUNCTION hive_dex.prune()
+    RETURNS void
+    LANGUAGE plpgsql
+    VOLATILE AS $function$
+        BEGIN
+            DELETE FROM hive_dex.orders
+            WHERE side = 'b'
+                AND settled >= hbd;
+            
+            DELETE FROM hive_dex.orders
+            WHERE side = 's'
+                AND settled >= hive;
+            
+            DELETE FROM hive_dex.orders
+            WHERE cancelled = true;
 
         END;
     $function$;
