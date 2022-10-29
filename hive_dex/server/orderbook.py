@@ -8,7 +8,7 @@ from hive_dex.tools import UTC_TIMESTAMP_FORMAT
 router_orderbook = APIRouter()
 
 @router_orderbook.get("/orderbook", tags=['orderbook'])
-async def get_orderbook(ticker_id, depth:int=10):
+async def get_orderbook(ticker_id="HIVE_HBD", depth:int=10):
     "Returns the orderbook."
     result = {}
     result['timezone'] = "UTC"
