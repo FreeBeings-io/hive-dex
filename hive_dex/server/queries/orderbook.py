@@ -4,11 +4,11 @@ def get_orderbook_buys(depth:int):
     sql_buys = f"""
         SELECT
             (
-                to_char((hive::decimal(12,3))/1000,'FM999999999.000')
-            ) hive,
+                round((hive::numeric(12,3))/1000, 3)
+            )::varchar hive,
             (
-                to_char(hbd::real/hive::numeric(20,6),'FM999999999.000000')
-            ) price
+                round(hbd::numeric/hive::numeric(20,6), 6)
+            )::varchar price
         FROM dev.orders
         WHERE pair_id = 'HIVE_HBD'
             AND side = 'b'
@@ -23,11 +23,11 @@ def get_orderbook_sells(depth:int):
     sql_sells = f"""
         SELECT
             (
-                to_char((hbd::real/hive)::numeric(20,6), 'FM9999999990.000000')
-            ) price,
+                round((hbd::numeric/hive)::numeric(20,6), 6)
+            )::varchar price,
             (
-                to_char((hive::numeric(12,3))/1000, 'FM9999999990.000')
-            ) hive
+                round((hive::numeric(12,3))/1000, 3)
+            )::varchar hive
         FROM dev.orders
         WHERE pair_id = 'HIVE_HBD'
             AND side = 's'
