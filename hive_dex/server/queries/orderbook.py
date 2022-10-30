@@ -1,4 +1,4 @@
-
+"""Queries to get orderbook state."""
 
 def get_orderbook_buys(depth:int):
     sql_buys = f"""

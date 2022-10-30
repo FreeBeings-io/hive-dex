@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS hive_dex.global_props(
-    latest_block_num INTEGER,
+    latest_block_num INTEGER DEFAULT 0,
+    latest_block_num_trades INTEGER DEFAULT 0,
     check_in TIMESTAMP,
-    sync_enabled BOOLEAN DEFAULT true
+    sync_enabled BOOLEAN DEFAULT true,
+    pre_sync_target INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS hive_dex.pairs(
@@ -39,7 +41,11 @@ CREATE TABLE IF NOT EXISTS hive_dex.trades(
     open_nai VARCHAR(11)
 );
 
-CREATE INDEX IF NOT EXISTS idx_hdx_orders_expires
+CREATE INDEX IF NOT EXISTS idx_hive_dex_orders_trx_id
+    ON hive_dex.orders (trx_id);
+
+CREATE INDEX IF NOT EXISTS idx_hive_dex_orders_acc_ord_side
+    ON hive_dex.orders (acc, order_id, side);
+
+CREATE INDEX IF NOT EXISTS idx_hive_dex_orders__expires
     ON hive_dex.orders (expires);
-
-

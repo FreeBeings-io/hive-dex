@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
 
-from hive_dex.database.access import select, select_raw
+from hive_dex.database.access import select_raw
 from hive_dex.server.queries.orderbook import get_orderbook_buys, get_orderbook_sells
 from hive_dex.tools import UTC_TIMESTAMP_FORMAT
 

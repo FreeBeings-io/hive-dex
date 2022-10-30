@@ -13,8 +13,8 @@ class SystemStatus:
     
     @classmethod
     def _get_global_props(cls):
-        sql = schemafy(f"SELECT latest_block_num, check_in FROM hive_dex.global_props;")
-        res = select(sql, ['latest_block_num', 'check_in'])
+        sql = schemafy(f"SELECT latest_block_num, check_in, latest_block_num_trades  FROM hive_dex.global_props;")
+        res = select(sql, ['latest_block_num', 'check_in', 'latest_block_num_trades'])
         return res[0]
 
     @classmethod
@@ -34,6 +34,7 @@ class SystemStatus:
             "haf": {
                 "hive_head": haf_head,
                 "db_head": global_props['latest_block_num'],
+                "trades_head": global_props['latest_block_num_trades'],
                 "health": health
             }
         }
