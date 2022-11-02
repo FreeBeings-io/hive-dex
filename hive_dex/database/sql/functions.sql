@@ -40,8 +40,8 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create_operation( _block_num INT
                 _hbd := _quote_amount;
             END IF;
 
-            INSERT INTO hive_dex.orders (acc, pair_id, side, order_id, hbd, hive, fill_or_kill, expires, trx_id)
-            VALUES (_acc, _pair_id, _side, _order_id, _hbd, _hive, _fill_or_kill, _expires, _trx_id);
+            INSERT INTO hive_dex.orders (acc, pair_id, side, order_id, hbd, hive, fill_or_kill, expires, trx_id, block_num)
+            VALUES (_acc, _pair_id, _side, _order_id, _hbd, _hive, _fill_or_kill, _expires, _trx_id, _block_num);
 
         END;
     $function$;
@@ -89,8 +89,8 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create2_operation( _block_num IN
                 _hbd := _quote_amount;
             END IF;
 
-            INSERT INTO hive_dex.orders (acc, pair_id, side, order_id, hbd, hive, fill_or_kill, expires, trx_id)
-            VALUES (_acc, _pair_id, _side, _order_id, _hbd, _hive, _fill_or_kill, _expires, _trx_id);
+            INSERT INTO hive_dex.orders (acc, pair_id, side, order_id, hbd, hive, fill_or_kill, expires, trx_id, block_num)
+            VALUES (_acc, _pair_id, _side, _order_id, _hbd, _hive, _fill_or_kill, _expires, _trx_id, _block_num);
 
         END;
     $function$;
@@ -173,9 +173,11 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
                 FROM hive_dex.orders
                 WHERE order_id = _current_id;
 
-                UPDATE hive_dex.orders SET
-                    settled = (temprow.settled + _hbd)
-                WHERE order_id = _current_id;
+                IF FOUND THEN
+                    UPDATE hive_dex.orders SET
+                        settled = (temprow.settled + _hbd)
+                    WHERE order_id = _current_id;
+                END IF;
             ELSIF _current_nai = '@@000000021' THEN
                 _side := 's';
                 _hive := _current_amount;
@@ -184,9 +186,11 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
                 FROM hive_dex.orders
                 WHERE order_id = _current_id;
 
-                UPDATE hive_dex.orders SET
-                    settled = (temprow.settled + _hive)
-                WHERE order_id = _current_id;
+                IF FOUND THEN
+                    UPDATE hive_dex.orders SET
+                        settled = (temprow.settled + _hive)
+                    WHERE order_id = _current_id;
+                END IF;
             END IF;
 
             -- open
@@ -197,9 +201,11 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
                 FROM hive_dex.orders
                 WHERE order_id = _open_id;
 
-                UPDATE hive_dex.orders SET
-                    settled = (temprow.settled + _hbd)
-                WHERE order_id = _open_id;
+                IF FOUND THEN
+                    UPDATE hive_dex.orders SET
+                        settled = (temprow.settled + _hbd)
+                    WHERE order_id = _open_id;
+                END IF;
             ELSIF _open_nai = '@@000000021' THEN
                 _hive := _open_amount;
                 
@@ -207,9 +213,11 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
                 FROM hive_dex.orders
                 WHERE order_id = _open_id;
 
-                UPDATE hive_dex.orders SET
-                    settled = (temprow.settled + _hive)
-                WHERE order_id = _open_id;
+                IF FOUND THEN
+                    UPDATE hive_dex.orders SET
+                        settled = (temprow.settled + _hive)
+                    WHERE order_id = _open_id;
+                END IF;
             END IF;
 
             INSERT INTO hive_dex.trades(

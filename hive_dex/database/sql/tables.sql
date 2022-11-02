@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS hive_dex.pairs(
 CREATE TABLE IF NOT EXISTS hive_dex.orders(
     id BIGSERIAL PRIMARY KEY,
     trx_id BYTEA,
+    block_num INTEGER,
     pair_id VARCHAR(9) REFERENCES hive_dex.pairs(pair_id),
     acc VARCHAR(16),
     order_id BIGINT,
@@ -43,6 +44,9 @@ CREATE TABLE IF NOT EXISTS hive_dex.trades(
 
 CREATE INDEX IF NOT EXISTS idx_hive_dex_orders_trx_id
     ON hive_dex.orders (trx_id);
+
+CREATE INDEX IF NOT EXISTS idx_hive_dex_orders_block_num
+    ON hive_dex.orders (block_num);
 
 CREATE INDEX IF NOT EXISTS idx_hive_dex_orders_acc_ord_side
     ON hive_dex.orders (acc, order_id, side);

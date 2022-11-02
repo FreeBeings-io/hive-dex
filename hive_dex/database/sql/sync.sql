@@ -142,19 +142,14 @@ CREATE OR REPLACE PROCEDURE hive_dex.sync_trades()
             _target INTEGER;
         BEGIN
             _op_ids := ARRAY [6,57,85];
-            _step := 10000;
+            _step := 100;
             _global_start_block := 0; -- (hive.app_get_irreversible_block()) - (30 * 24 * 60 * 20);
-            SELECT latest_block_num_trades INTO _latest_block_num FROM hive_dex.global_props;
+            SELECT MIN(block_num) INTO _latest_block_num FROM hive_dex.orders;
+            SELECT latest_block_num INTO _target FROM hive_dex.global_props;
 
-            --decide which block to start at initially
-            IF _latest_block_num IS NULL THEN
-                _begin := _global_start_block;
-            ELSE
-                _begin := _latest_block_num;
-            END IF;
-
+            _begin := _latest_block_num +1;
+            
             -- process pending
-            _target := hive.app_get_irreversible_block();
             IF _target - _begin >= 0 THEN
                 RAISE NOTICE 'New block range: <%,%>', _begin, _target;
                 FOR _first_block IN _begin .. _target BY _step LOOP
