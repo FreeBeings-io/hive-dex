@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS hive_dex.global_props(
     latest_block_num_trades INTEGER,
     check_in TIMESTAMP,
     sync_enabled BOOLEAN DEFAULT true,
-    pre_sync_target INTEGER
+    start_block INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS hive_dex.pairs(
