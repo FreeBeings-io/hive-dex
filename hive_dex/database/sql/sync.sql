@@ -54,8 +54,8 @@ CREATE OR REPLACE PROCEDURE hive_dex.sync_main()
             _target INTEGER;
         BEGIN
             _op_ids := ARRAY [5,21,6,57,85];
-            _step := 1000;
-            _global_start_block := (hive.app_get_irreversible_block()) - (3 * 24 * 60 * 20);
+            _step := 100000;
+            SELECT start_block INTO _global_start_block FROM hive_dex.global_props;
             SELECT latest_block_num INTO _latest_block_num FROM hive_dex.global_props;
 
             --decide which block to start at initially

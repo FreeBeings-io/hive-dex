@@ -53,8 +53,8 @@ def run_server():
     uvicorn.run(
         "hive_dex.server.serve:app",
         host=config['server_host'],
-        port=int(config['server_port']),
+        port=config['server_port'],
         log_level="info",
         reload=False,
-        workers=int(config['server_workers'])
+        workers=config['server_workers']
     )
