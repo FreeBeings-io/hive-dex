@@ -1,18 +1,17 @@
-
+"""Queries to get orderbook state."""
 
 def get_orderbook_buys(depth:int):
     sql_buys = f"""
         SELECT
             (
-                round((hive::numeric(12,3))/1000, 3)
-            )::varchar hive,
+                round(pays::numeric/receives::numeric, 6)
+            )::varchar price,
             (
-                round(hbd::numeric/hive::numeric(20,6), 6)
-            )::varchar price
+                round((receives::numeric)/1000, 3)
+            )::varchar hive
         FROM dev.orders
-        WHERE pair_id = 'HIVE_HBD'
-            AND side = 'b'
-            AND settled < hbd
+        WHERE pays_nai = '@@000000013'
+            AND settled < pays
             AND expires > NOW() AT TIME ZONE 'utc'
         ORDER BY price DESC
         LIMIT {depth};
@@ -23,15 +22,14 @@ def get_orderbook_sells(depth:int):
     sql_sells = f"""
         SELECT
             (
-                round((hbd::numeric/hive)::numeric(20,6), 6)
+                round((receives::numeric/pays), 6)
             )::varchar price,
             (
-                round((hive::numeric(12,3))/1000, 3)
+                round((pays::numeric)/1000, 3)
             )::varchar hive
         FROM dev.orders
-        WHERE pair_id = 'HIVE_HBD'
-            AND side = 's'
-            AND settled < hive
+        WHERE pays_nai = '@@000000021'
+            AND settled < pays
             AND expires > NOW() AT TIME ZONE 'utc'
         ORDER BY price ASC
         LIMIT {depth};
