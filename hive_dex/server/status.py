@@ -23,6 +23,8 @@ class SystemStatus:
         now = datetime.strftime(datetime.utcnow(),UTC_TIMESTAMP_FORMAT)
         haf_head = cls._get_haf_sync_head()['head_block_num']
         global_props = cls._get_global_props()
+        if global_props['latest_block_num'] is None:
+            global_props['latest_block_num'] = 0
         _diff = haf_head - global_props['latest_block_num']
         if _diff > 10:
             health = f"BAD - {_diff} blocks behind"

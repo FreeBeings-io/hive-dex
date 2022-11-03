@@ -60,26 +60,24 @@ class Haf:
     @classmethod
     def _cleanup(cls, db):
         """Stops any running sync procedures from previous instances."""
-        running = db.do('select_one', f"SELECT {config['schema']}.is_sync_running('{config['schema']}-main');")
-        if running is True:
-            db.do('execute', f"SELECT {config['schema']}.terminate_main_sync('{config['schema']}-main');")
-        cmds = [
-            f"DROP SCHEMA {config['schema']} CASCADE;",
-        ]
+        try:
+            running = db.do('select_one', f"SELECT {config['schema']}.is_sync_running('{config['schema']}-main');")
+            if running is True:
+                db.do('execute', f"SELECT {config['schema']}.terminate_main_sync('{config['schema']}-main');")
+        except:
+            pass
         if config['reset'] == 'true':
-            for cmd in cmds:
-                try:
-                    db.do('execute', cmd)
-                    db.do('commit')
-                except Exception as err:
-                    print(f"Reset encountered error: {err}")
-            cls._init_hive_dex(db)
+            try:
+                db.do('execute', f"DROP SCHEMA {config['schema']} CASCADE;")
+                db.do('commit')
+            except Exception as err:
+                print(f"Reset encountered error: {err}")
 
     @classmethod
     def init(cls, db):
         """Initializes the HAF sync process."""
-        cls._init_hive_dex(db)
         cls._cleanup(db)
+        cls._init_hive_dex(db)
         cls._prepare_data(db)
         start = db.do('select', f"SELECT {config['schema']}.global_sync_enabled()")[0][0]
         if start is True:
