@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS hive_dex.global_props(
     latest_block_num INTEGER,
+    latest_block_num_trades INTEGER,
     check_in TIMESTAMP,
-    sync_enabled BOOLEAN DEFAULT true
+    sync_enabled BOOLEAN DEFAULT true,
+    pre_sync_target INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS hive_dex.pairs(
@@ -11,19 +13,18 @@ CREATE TABLE IF NOT EXISTS hive_dex.pairs(
 );
 
 CREATE TABLE IF NOT EXISTS hive_dex.orders(
-    id BIGSERIAL PRIMARY KEY,
     trx_id BYTEA,
-    pair_id VARCHAR(9) REFERENCES hive_dex.pairs(pair_id),
+    block_num INTEGER,
     acc VARCHAR(16),
     order_id BIGINT,
-    side VARCHAR(1),
-    hbd BIGINT,
-    hive BIGINT,
+    pays BIGINT,
+    pays_nai VARCHAR(11),
+    receives BIGINT,
+    receives_nai VARCHAR(11),
     settled BIGINT DEFAULT 0,
     fill_or_kill BOOLEAN,
     expires TIMESTAMP,
-    cancel_id BYTEA,
-    cancelled BOOLEAN
+    PRIMARY KEY (acc, order_id)
 );
 
 CREATE TABLE IF NOT EXISTS hive_dex.trades(
@@ -39,7 +40,5 @@ CREATE TABLE IF NOT EXISTS hive_dex.trades(
     open_nai VARCHAR(11)
 );
 
-CREATE INDEX IF NOT EXISTS idx_hdx_orders_expires
+CREATE INDEX IF NOT EXISTS idx_hive_dex_orders__expires
     ON hive_dex.orders (expires);
-
-

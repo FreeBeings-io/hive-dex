@@ -40,8 +40,17 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create_operation( _block_num INT
                 _hbd := _quote_amount;
             END IF;
 
-            INSERT INTO hive_dex.orders (acc, pair_id, side, order_id, hbd, hive, fill_or_kill, expires, trx_id)
-            VALUES (_acc, _pair_id, _side, _order_id, _hbd, _hive, _fill_or_kill, _expires, _trx_id);
+            INSERT INTO hive_dex.orders (acc, order_id, pays, pays_nai, receives, receives_nai, fill_or_kill, expires, trx_id, block_num)
+            VALUES (_acc, _order_id, _base_amount, _base_nai, _quote_amount, _quote_nai, _fill_or_kill, _expires, _trx_id, _block_num)
+            ON CONFLICT (acc, order_id) DO UPDATE
+                SET pays = _base_amount,
+                    pays_nai = _base_nai,
+                    receives = _quote_amount,
+                    receives_nai = _quote_nai,
+                    fill_or_kill = _fill_or_kill,
+                    expires= _expires,
+                    trx_id = _trx_id,
+                    block_num = _block_num;
 
         END;
     $function$;
@@ -89,8 +98,17 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create2_operation( _block_num IN
                 _hbd := _quote_amount;
             END IF;
 
-            INSERT INTO hive_dex.orders (acc, pair_id, side, order_id, hbd, hive, fill_or_kill, expires, trx_id)
-            VALUES (_acc, _pair_id, _side, _order_id, _hbd, _hive, _fill_or_kill, _expires, _trx_id);
+            INSERT INTO hive_dex.orders (acc, order_id, pays, pays_nai, receives, receives_nai, fill_or_kill, expires, trx_id, block_num)
+            VALUES (_acc, _order_id, _base_amount, _base_nai, _quote_amount, _quote_nai, _fill_or_kill, _expires, _trx_id, _block_num)
+            ON CONFLICT (acc, order_id) DO UPDATE
+                SET pays = _base_amount,
+                    pays_nai = _base_nai,
+                    receives = _quote_amount,
+                    receives_nai = _quote_nai,
+                    fill_or_kill = _fill_or_kill,
+                    expires= _expires,
+                    trx_id = _trx_id,
+                    block_num = _block_num;
 
         END;
     $function$;
@@ -107,10 +125,7 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_cancel_operation( _block_num INT
             _acc := _data->'value'->>'owner';
             _order_id := _data->'value'->'orderid';
 
-            UPDATE hive_dex.orders
-            SET cancel_id = _trx_id
-            WHERE acc = _acc
-                AND order_id = _order_id;
+            DELETE FROM hive_dex.orders WHERE acc = _acc AND order_id = _order_id;
 
         END;
     $function$;
@@ -125,10 +140,6 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_cancelled_operation( _block_num 
 
             _acc := _data->'value'->>'seller';
 
-            UPDATE hive_dex.orders
-            SET cancelled = true
-            WHERE acc = _acc
-                AND cancel_id = _trx_id;
 
         END;
     $function$;
@@ -165,52 +176,17 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
             _open_nai := _data->'value'->'open_pays'->>'nai';
 
             -- current
-            IF _current_nai = '@@000000013' THEN
-                _side := 'b';
-                _hbd := _current_amount;
 
-                SELECT id,hbd,settled INTO temprow
-                FROM hive_dex.orders
-                WHERE order_id = _current_id;
-
-                UPDATE hive_dex.orders SET
-                    settled = (temprow.settled + _hbd)
-                WHERE order_id = _current_id;
-            ELSIF _current_nai = '@@000000021' THEN
-                _side := 's';
-                _hive := _current_amount;
-
-                SELECT id,settled,hive INTO temprow
-                FROM hive_dex.orders
-                WHERE order_id = _current_id;
-
-                UPDATE hive_dex.orders SET
-                    settled = (temprow.settled + _hive)
-                WHERE order_id = _current_id;
-            END IF;
+            UPDATE hive_dex.orders
+                SET pays = pays - _current_amount
+            WHERE acc = _current_owner
+                AND order_id = _current_id;
 
             -- open
-            IF _open_nai = '@@000000013' THEN
-                _hbd := _open_amount;
-                
-                SELECT id,hbd,settled INTO temprow
-                FROM hive_dex.orders
-                WHERE order_id = _open_id;
-
-                UPDATE hive_dex.orders SET
-                    settled = (temprow.settled + _hbd)
-                WHERE order_id = _open_id;
-            ELSIF _open_nai = '@@000000021' THEN
-                _hive := _open_amount;
-                
-                SELECT id,settled,hive INTO temprow
-                FROM hive_dex.orders
-                WHERE order_id = _open_id;
-
-                UPDATE hive_dex.orders SET
-                    settled = (temprow.settled + _hive)
-                WHERE order_id = _open_id;
-            END IF;
+            UPDATE hive_dex.orders
+                SET pays = pays - _open_amount
+            WHERE acc = _open_owner
+                AND order_id = _open_id;
 
             INSERT INTO hive_dex.trades(
                 block_num, block_time, trx_id, current_owner, 
@@ -230,15 +206,6 @@ CREATE OR REPLACE FUNCTION hive_dex.prune()
     VOLATILE AS $function$
         BEGIN
             DELETE FROM hive_dex.orders
-            WHERE side = 'b'
-                AND settled >= hbd;
-            
-            DELETE FROM hive_dex.orders
-            WHERE side = 's'
-                AND settled >= hive;
-            
-            DELETE FROM hive_dex.orders
-            WHERE cancelled = true;
-
+            WHERE settled >= pays;
         END;
     $function$;
