@@ -6,8 +6,8 @@ from hive_dex.tools import UTC_TIMESTAMP_FORMAT
 PAIRS = [
     {
         "ticker": "HIVE_HBD",
-        "base": "HBD",
-        "target": "HIVE"
+        "base": "HIVE",
+        "quote": "HBD"
     }
 ]
 

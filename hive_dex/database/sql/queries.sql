@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             _high_price NUMERIC;
             _low_price NUMERIC;
             _base_volume BIGINT;
-            _target_volume BIGINT;
+            _quote_volume BIGINT;
             _block_num_yest BIGINT;
         BEGIN
             SELECT * INTO temprow FROM hive_dex.trades ORDER BY id DESC LIMIT 1;
@@ -24,13 +24,13 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             _block_num_yest := (hive.app_get_irreversible_block()) - (1 * 24 * 60 * 20);
             -- hbd vol
             SELECT ROUND(SUM(current_amount)/1000::numeric,3) hbd
-            INTO _base_volume
+            INTO _quote_volume
             FROM hive_dex.trades
             WHERE current_nai = '@@000000013'
                 AND block_num >= _block_num_yest;
             -- hive vol
             SELECT ROUND(SUM(current_amount)/1000::numeric,3) hive
-            INTO _target_volume
+            INTO _base_volume
             FROM hive_dex.trades
             WHERE current_nai = '@@000000021'
                 AND block_num >= _block_num_yest;
@@ -66,7 +66,7 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             RETURN jsonb_build_object(
                 'last_price',_last_price,
                 'base_volume',_base_volume,
-                'target_volume',_target_volume,
+                'quote_volume',_quote_volume,
                 'bid', _best_bid,
                 'ask', _best_ask,
                 'high', _high_price,

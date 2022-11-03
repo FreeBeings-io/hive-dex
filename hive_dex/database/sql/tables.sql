@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS hive_dex.global_props(
 CREATE TABLE IF NOT EXISTS hive_dex.pairs(
     pair_id VARCHAR(9) PRIMARY KEY,
     base VARCHAR(4),
-    target VARCHAR(4)
+    quote VARCHAR(4)
 );
 
 CREATE TABLE IF NOT EXISTS hive_dex.orders(
