@@ -40,7 +40,7 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
                     round((pays::numeric/receives::numeric)::numeric, 6)
                 )::varchar price
             INTO _best_bid
-            FROM dev.orders
+            FROM hive_dex.orders
             WHERE pays_nai = '@@000000013'
                 AND settled < pays
                 AND expires > NOW() AT TIME ZONE 'utc'
@@ -52,7 +52,7 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
                     round((receives::numeric/pays::numeric)::numeric, 6)
                 )::varchar price
             INTO _best_ask
-            FROM dev.orders
+            FROM hive_dex.orders
             WHERE pays_nai = '@@000000021'
                 AND settled < pays
                 AND expires > NOW() AT TIME ZONE 'utc'
