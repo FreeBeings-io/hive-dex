@@ -154,6 +154,7 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
             _side VARCHAR(1);
             _hbd BIGINT := 0;
             _hive BIGINT := 0;
+            _price NUMERIC(12,6);
 
             _current_id BIGINT;
             _current_amount BIGINT;
@@ -175,6 +176,12 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
             _open_amount := _data->'value'->'open_pays'->>'amount';
             _open_nai := _data->'value'->'open_pays'->>'nai';
 
+            IF _current_nai = '@@000000013' THEN
+                _price := round((_current_amount::numeric/_open_amount::numeric)::numeric(12,6), 6);
+            ELSIF _current_nai = '@@000000021' THEN
+                _price := round((_open_amount::numeric/_current_amount::numeric)::numeric(12,6), 6);
+            END IF;
+
             -- current
 
             UPDATE hive_dex.orders
@@ -189,12 +196,12 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
                 AND order_id = _open_id;
 
             INSERT INTO hive_dex.trades(
-                block_num, block_time, trx_id, current_owner, 
-                current_amount, current_nai, open_owner, open_amount, open_nai
+                block_num, block_time, trx_id, current_owner, current_amount,
+                current_nai, open_owner, open_amount, open_nai, price
             )
             VALUES (
-                _block_num, _block_time, _trx_id, _current_owner,
-                _current_amount, _current_nai, _open_owner, _open_amount, _open_nai
+                _block_num, _block_time, _trx_id, _current_owner, _current_amount,
+                _current_nai, _open_owner, _open_amount, _open_nai, _price
             );
 
         END;
@@ -206,6 +213,6 @@ CREATE OR REPLACE FUNCTION hive_dex.prune()
     VOLATILE AS $function$
         BEGIN
             DELETE FROM hive_dex.orders
-            WHERE settled >= pays;
+            WHERE pays = 0;
         END;
     $function$;
