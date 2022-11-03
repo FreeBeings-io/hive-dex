@@ -34,7 +34,7 @@ class Haf:
     def _init_hive_dex(cls, db):
         db.do('execute', f"CREATE SCHEMA IF NOT EXISTS {config['schema']};")
         db.do('commit')
-        for _file in ['tables.sql', 'functions.sql', 'sync.sql']:
+        for _file in ['tables.sql', 'functions.sql', 'sync.sql', 'queries.sql']:
             _sql = (open(f'{SOURCE_DIR}/{_file}', 'r', encoding='UTF-8').read()
                 .replace('hive_dex.', f"{config['schema']}.")
             )

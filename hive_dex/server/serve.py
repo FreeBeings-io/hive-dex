@@ -4,8 +4,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from hive_dex.config import Config
-from hive_dex.server.pairs import router_pairs
-from hive_dex.server.orderbook import router_orderbook
+from hive_dex.server.endpoints.pairs import router_pairs
+from hive_dex.server.endpoints.orderbook import router_orderbook
+from hive_dex.server.endpoints.tickers import router_tickers
 from hive_dex.server.status import SystemStatus
 from hive_dex.server.api_metadata import TITLE, DESCRIPTION, VERSION, CONTACT, LICENSE, TAGS_METADATA
 
@@ -33,6 +34,7 @@ app.add_middleware(
 
 app.include_router(router_pairs)
 app.include_router(router_orderbook)
+app.include_router(router_tickers)
 
 async def root():
     """Reports the status of Hive DEX API."""
