@@ -37,8 +37,15 @@ CREATE TABLE IF NOT EXISTS hive_dex.trades(
     current_nai VARCHAR(11),
     open_owner VARCHAR(16),
     open_amount FLOAT,
-    open_nai VARCHAR(11)
+    open_nai VARCHAR(11),
+    price NUMERIC(12,6)
 );
 
-CREATE INDEX IF NOT EXISTS idx_hive_dex_orders__expires
-    ON hive_dex.orders (expires);
+CREATE INDEX IF NOT EXISTS idx_hive_dex_orders_pays
+    ON hive_dex.orders (pays);
+
+CREATE INDEX IF NOT EXISTS idx_hive_dex_trades_block_num
+    ON hive_dex.trades (block_num);
+
+CREATE INDEX IF NOT EXISTS idx_hive_dex_trades_current_nai
+    ON hive_dex.trades (current_nai);
