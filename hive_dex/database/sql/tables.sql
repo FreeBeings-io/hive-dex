@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS hive_dex.trades(
     open_owner VARCHAR(16),
     open_amount FLOAT,
     open_nai VARCHAR(11),
-    price NUMERIC(12,6)
+    price NUMERIC
 );
 
 CREATE INDEX IF NOT EXISTS idx_hive_dex_orders_pays

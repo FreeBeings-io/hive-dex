@@ -6,20 +6,20 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             temprow RECORD;
             _nai VARCHAR(11);
             _side VARCHAR(4);
-            _last_price NUMERIC(12,6);
-            _best_bid NUMERIC(12,6);
-            _best_ask NUMERIC(12,6);
-            _high_price NUMERIC(12,6);
-            _low_price NUMERIC(12,6);
+            _last_price NUMERIC;
+            _best_bid NUMERIC;
+            _best_ask NUMERIC;
+            _high_price NUMERIC;
+            _low_price NUMERIC;
             _base_volume BIGINT;
             _target_volume BIGINT;
             _block_num_yest BIGINT;
         BEGIN
             SELECT * INTO temprow FROM hive_dex.trades ORDER BY id DESC LIMIT 1;
             IF temprow.current_nai = '@@000000013' THEN
-                _last_price := round((temprow.current_amount::numeric / temprow.open_amount::numeric)::numeric(12,6), 6);
+                _last_price := round((temprow.current_amount::numeric / temprow.open_amount::numeric)::numeric, 6);
             ELSIF temprow.current_nai = '@@000000021' THEN
-                _last_price := round((temprow.open_amount::numeric / temprow.current_amount::numeric)::numeric(12,6), 6);
+                _last_price := round((temprow.open_amount::numeric / temprow.current_amount::numeric)::numeric, 6);
             END IF;
             _block_num_yest := (hive.app_get_irreversible_block()) - (1 * 24 * 60 * 20);
             -- hbd vol
@@ -37,7 +37,7 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             -- bid
             SELECT
                 (
-                    round((pays::numeric/receives::numeric)::numeric(12,6), 6)
+                    round((pays::numeric/receives::numeric)::numeric, 6)
                 )::varchar price
             INTO _best_bid
             FROM dev.orders
@@ -49,7 +49,7 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             -- ask
             SELECT
                 (
-                    round((receives::numeric/pays::numeric)::numeric(12,6), 6)
+                    round((receives::numeric/pays::numeric)::numeric, 6)
                 )::varchar price
             INTO _best_ask
             FROM dev.orders
