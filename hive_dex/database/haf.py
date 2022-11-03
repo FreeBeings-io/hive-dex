@@ -42,7 +42,7 @@ class Haf:
         db.do('commit')
         has_globs = db.do('select', f"SELECT * FROM {config['schema']}.global_props;")
         if not has_globs:
-            db.do('execute', f"INSERT INTO {config['schema']}.global_props (check_in) VALUES (NULL);")
+            db.do('execute', f"INSERT INTO {config['schema']}.global_props (check_in, start_block) VALUES (NULL, {config['start_block']});")
             db.do('commit')
     
     @classmethod
