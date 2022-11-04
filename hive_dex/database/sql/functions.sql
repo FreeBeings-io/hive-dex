@@ -214,5 +214,9 @@ CREATE OR REPLACE FUNCTION hive_dex.prune()
         BEGIN
             DELETE FROM hive_dex.orders
             WHERE pays = 0;
+
+            DELETE FROM hive_dex.orders
+            WHERE fill_or_kill = true
+                AND block_num < (hive.app_get_irreversible_block() - 1200);
         END;
     $function$;

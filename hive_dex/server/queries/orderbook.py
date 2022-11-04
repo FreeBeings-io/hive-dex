@@ -16,6 +16,7 @@ def get_orderbook_buys(depth:int):
         WHERE pays_nai = '@@000000013'
             AND settled < pays
             AND expires > NOW() AT TIME ZONE 'utc'
+            AND fill_or_kill = false
         GROUP BY price
         ORDER BY price DESC
         LIMIT {depth};
@@ -35,6 +36,7 @@ def get_orderbook_sells(depth:int):
         WHERE pays_nai = '@@000000021'
             AND settled < pays
             AND expires > NOW() AT TIME ZONE 'utc'
+            AND fill_or_kill = false
         GROUP BY price
         ORDER BY price ASC
         LIMIT {depth};
