@@ -14,7 +14,7 @@ def get_orderbook_buys(depth:int):
             ))::varchar hive
         FROM hive_dex.orders
         WHERE pays_nai = '@@000000013'
-            AND settled < pays
+            AND pays > 0
             AND expires > NOW() AT TIME ZONE 'utc'
             AND fill_or_kill = false
         GROUP BY price
@@ -34,9 +34,9 @@ def get_orderbook_sells(depth:int):
             ))::varchar hive
         FROM hive_dex.orders
         WHERE pays_nai = '@@000000021'
-            AND settled < pays
+            AND pays > 0
             AND expires > NOW() AT TIME ZONE 'utc'
-            
+            AND fill_or_kill = false
         GROUP BY price
         ORDER BY price ASC
         LIMIT {depth};

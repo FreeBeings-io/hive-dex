@@ -91,6 +91,9 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create2_operation( _block_num IN
             _fill_or_kill := _data->'value'->'fill_or_kill';
             _expires := _data->'value'->>'expiration';
 
+            IF _expires > (timezone('UTC', _block_time) + '28 days'::interval) THEN
+                RETURN;
+            END IF;
 
             IF _base_nai = '@@000000013' THEN
                 _side := 'b';
