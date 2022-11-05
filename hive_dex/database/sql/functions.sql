@@ -30,6 +30,10 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create_operation( _block_num INT
             _fill_or_kill := _data->'value'->'fill_or_kill';
             _expires := _data->'value'->>'expiration';
 
+            IF _expires > (timezone('UTC', _block_time) + '28 days'::interval) THEN
+                RETURN;
+            END IF;
+
             IF _base_nai = '@@000000013' THEN
                 _side := 'b';
                 _hbd := _base_amount;
@@ -215,8 +219,8 @@ CREATE OR REPLACE FUNCTION hive_dex.prune()
             DELETE FROM hive_dex.orders
             WHERE pays = 0;
 
-            DELETE FROM hive_dex.orders
-            WHERE fill_or_kill = true
-                AND block_num < (hive.app_get_irreversible_block() - 1200);
+            --DELETE FROM hive_dex.orders
+            --WHERE fill_or_kill = true
+                --AND block_num < (hive.app_get_irreversible_block() - 1200);
         END;
     $function$;
