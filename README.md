@@ -6,7 +6,7 @@
 </p>
 
 
-<p align="center">Market data for the Hive blockchain's internal decentralized exchange</p>
+<p align="center">Market data for the Hive blockchain's internal decentralized exchange.</p>
 
 ---
 
