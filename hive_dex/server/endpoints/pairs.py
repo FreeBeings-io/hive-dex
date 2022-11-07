@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from datetime import datetime
+from hive_dex.server.buffer import Buffer
 
-from hive_dex.tools import UTC_TIMESTAMP_FORMAT
+from hive_dex.tools import UTC_TIMESTAMP_FORMAT, add_server_metadata
 
 PAIRS = [
     {
@@ -18,10 +19,14 @@ def _get_pairs():
 
 
 @router_pairs.get("/pairs", tags=['pairs'])
-async def get_pairs():
+async def get_pairs(request: Request):
     "Returns the available pairs."
+    _buffer = Buffer.check_buffer(request['path'])
+    if _buffer is not None:
+        return _buffer
     result = {}
     result['timezone'] = "UTC"
     result['server_time'] = datetime.strftime(datetime.utcnow(), UTC_TIMESTAMP_FORMAT)
     result["symbols"] = _get_pairs()
-    return result
+    Buffer.update_buffer(request['path'], result)
+    return add_server_metadata(result)

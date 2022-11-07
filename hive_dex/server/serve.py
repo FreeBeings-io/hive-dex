@@ -1,16 +1,17 @@
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from hive_dex.config import Config
+from hive_dex.server.buffer import Buffer
 from hive_dex.server.endpoints.pairs import router_pairs
 from hive_dex.server.endpoints.orderbook import router_orderbook
 from hive_dex.server.endpoints.tickers import router_tickers
 from hive_dex.server.status import SystemStatus
 from hive_dex.server.api_metadata import TITLE, DESCRIPTION, VERSION, CONTACT, LICENSE, TAGS_METADATA
 
-from hive_dex.tools import normalize_types
+from hive_dex.tools import add_server_metadata, normalize_types
 
 config = Config.config
 
@@ -36,13 +37,17 @@ app.include_router(router_pairs)
 app.include_router(router_orderbook)
 app.include_router(router_tickers)
 
-async def root():
+async def root(request: Request):
     """Reports the status of Hive DEX API."""
+    _buffer = Buffer.check_buffer(request['path'])
+    if _buffer is not None:
+        return _buffer
     report = {
         'name': 'Hive DEX API',
         'status': normalize_types(SystemStatus.get_server_status())
     }
-    return report
+    Buffer.update_buffer(request['path'], report)
+    return add_server_metadata(report)
 
 # SYSTEM
 

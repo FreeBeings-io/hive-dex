@@ -35,3 +35,8 @@ def normalize_types(data):
 def schemafy(data:str):
     _data = data.replace('hive_dex.', f"{config['schema']}.")
     return _data
+
+def add_server_metadata(data:dict):
+    data['timezone'] = 'UTC'
+    data['server_time'] = datetime.strftime(datetime.utcnow(), UTC_TIMESTAMP_FORMAT)
+    return data
