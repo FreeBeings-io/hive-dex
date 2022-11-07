@@ -7,7 +7,7 @@ def get_orderbook_buys(depth:int):
     sql_buys = f"""
         SELECT
             (
-                floor((pays::numeric/receives::numeric)::numeric, 6)
+                round((pays::numeric/receives::numeric)::numeric, 6)
             )::varchar price,
             (
                 SUM(round((receives::numeric)/1000, 3)
@@ -27,7 +27,7 @@ def get_orderbook_sells(depth:int):
     sql_sells = f"""
         SELECT
             (
-                floor((receives::numeric/pays::numeric)::numeric, 6)
+                round((receives::numeric/pays::numeric)::numeric, 6)
             )::varchar price,
             (
                 SUM(round((pays::numeric)/1000, 3)
