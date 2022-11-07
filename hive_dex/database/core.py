@@ -51,7 +51,7 @@ class DbSession:
                 else:
                     raise Exception(f"Invalid query type passed: {query_type}")
             except psycopg2.OperationalError as err:
-                if "server closed the connection unexpectedly" in err.args[0]:
+                if "connection" in err.args[0] and "closed" in err.args[0]:
                     print(f"Connection lost. Reconnecting...")
                     self.new_conn()
                 else:
