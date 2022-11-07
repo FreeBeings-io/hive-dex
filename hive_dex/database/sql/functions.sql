@@ -7,13 +7,9 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create_operation( _block_num INT
             _acc VARCHAR(16);
             _order_id BIGINT;
             _pair_id VARCHAR(9);
-            _hbd BIGINT;
-            _hive BIGINT;
-            _side VARCHAR(1);
             _fill_or_kill BOOLEAN;
             _expires TIMESTAMP;
-            
-            _price REAL;
+
             _base_amount BIGINT;
             _base_nai VARCHAR(11);
             _quote_amount BIGINT;
@@ -32,16 +28,6 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create_operation( _block_num INT
 
             IF _expires > (timezone('UTC', _block_time) + '28 days'::interval) THEN
                 RETURN;
-            END IF;
-
-            IF _base_nai = '@@000000013' THEN
-                _side := 'b';
-                _hbd := _base_amount;
-                _hive := _quote_amount;
-            ELSIF _base_nai = '@@000000021' THEN
-                _side := 's';
-                _hive := _base_amount;
-                _hbd := _quote_amount;
             END IF;
 
             INSERT INTO hive_dex.orders (acc, order_id, pays, pays_nai, receives, receives_nai, fill_or_kill, expires, trx_id, block_num)
@@ -68,13 +54,9 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create2_operation( _block_num IN
             _acc VARCHAR(16);
             _order_id BIGINT;
             _pair_id VARCHAR(9);
-            _hbd BIGINT;
-            _hive BIGINT;
-            _side VARCHAR(1);
             _fill_or_kill BOOLEAN;
             _expires TIMESTAMP;
-            
-            _price REAL;
+
             _base_amount BIGINT;
             _base_nai VARCHAR(11);
             _quote_amount BIGINT;
@@ -93,16 +75,6 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_create2_operation( _block_num IN
 
             IF _expires > (timezone('UTC', _block_time) + '28 days'::interval) THEN
                 RETURN;
-            END IF;
-
-            IF _base_nai = '@@000000013' THEN
-                _side := 'b';
-                _hbd := _base_amount;
-                _hive := _quote_amount;
-            ELSIF _base_nai = '@@000000021' THEN
-                _side := 's';
-                _hive := _base_amount;
-                _hbd := _quote_amount;
             END IF;
 
             INSERT INTO hive_dex.orders (acc, order_id, pays, pays_nai, receives, receives_nai, fill_or_kill, expires, trx_id, block_num)
@@ -144,10 +116,8 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_cancelled_operation( _block_num 
         DECLARE
             _acc VARCHAR(16);
         BEGIN
-
             _acc := _data->'value'->>'seller';
-
-
+            -- TODO: investigate future use
         END;
     $function$;
 
@@ -159,8 +129,6 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
             _current_owner VARCHAR(16);
             _open_owner VARCHAR(16);
             _side VARCHAR(1);
-            _hbd BIGINT := 0;
-            _hive BIGINT := 0;
             _price NUMERIC;
 
             _current_id BIGINT;
@@ -170,7 +138,6 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
             _open_amount BIGINT;
             _open_nai VARCHAR(11);
 
-            temprow RECORD;
         BEGIN
 
             _current_id := _data->'value'->>'current_orderid';
@@ -221,6 +188,9 @@ CREATE OR REPLACE FUNCTION hive_dex.prune()
         BEGIN
             DELETE FROM hive_dex.orders
             WHERE pays = 0;
+
+            DELETE FROM hive_dex.orders
+            WHERE expires < NOW() AT TIME ZONE 'utc';
 
             --DELETE FROM hive_dex.orders
             --WHERE fill_or_kill = true
