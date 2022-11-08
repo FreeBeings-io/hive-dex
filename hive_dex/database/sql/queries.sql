@@ -42,8 +42,9 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             INTO _best_bid
             FROM hive_dex.orders
             WHERE pays_nai = '@@000000013'
-                AND settled < pays
+                AND pays > 0
                 AND expires > NOW() AT TIME ZONE 'utc'
+                AND fill_or_kill = false
             ORDER BY price DESC
             LIMIT 1;
             -- ask
@@ -54,8 +55,9 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             INTO _best_ask
             FROM hive_dex.orders
             WHERE pays_nai = '@@000000021'
-                AND settled < pays
+                AND pays > 0
                 AND expires > NOW() AT TIME ZONE 'utc'
+                AND fill_or_kill = false
             ORDER BY price ASC
             LIMIT 1;
             -- high/low
