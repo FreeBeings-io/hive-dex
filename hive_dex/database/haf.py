@@ -59,6 +59,8 @@ class Haf:
     def _init_main_sync(cls, db):
         print("Starting main sync process...")
         db.do('execute', f"CALL {config['schema']}.sync_main();")
+        print("Main sync stopped.")
+        os._exit(1)
     
     @classmethod
     def _cleanup(cls, db):
