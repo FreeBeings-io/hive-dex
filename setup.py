@@ -3,7 +3,8 @@ import sys
 from setuptools import find_packages
 from setuptools import setup
 
-assert sys.version_info[0] == 3 and sys.version_info[1] >= 10, "Hive DEX requires Python 3.10 or newer"
+assert sys.version_info[0] == 3 and sys.version_info[1] >= 10, \
+    "Hive DEX requires Python 3.10 or newer"
 
 setup(
     name='hive_dex',

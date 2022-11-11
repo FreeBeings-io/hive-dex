@@ -4,8 +4,8 @@ class Config:
     config = {}
 
     @classmethod
-    def validate(cls):
-        pass
+    def _validate(cls):
+        pass # TODO
 
     @classmethod
     def load_config(cls):

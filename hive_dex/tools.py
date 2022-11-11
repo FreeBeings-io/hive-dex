@@ -1,13 +1,16 @@
-from datetime import datetime
 import decimal
+from datetime import datetime
 
 from hive_dex.config import Config
 
-config = Config.config
-
 UTC_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
+config = Config.config
+
 def populate_by_schema(data, fields):
+    """ Populate a new dictionary of items.
+    From an array of data items, a new dictionary is mapped to provided fields.
+    """
     result = {}
     for i in range(len(fields)):
         result[fields[i]] = data[i]

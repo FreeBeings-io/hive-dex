@@ -14,7 +14,6 @@ def run():
     try:
         """Runs main application processes and server."""
         print("---   Hive DEX API started   ---")
-        time.sleep(3)
         Haf.init(db)
         time.sleep(6)
         run_server()

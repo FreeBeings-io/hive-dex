@@ -42,14 +42,17 @@ class Haf:
         db.do('commit')
         has_globs = db.do('select', f"SELECT * FROM {config['schema']}.global_props;")
         if not has_globs:
-            db.do('execute', f"INSERT INTO {config['schema']}.global_props (check_in, start_block) VALUES (NULL, {config['start_block']});")
+            db.do('execute',
+                f"INSERT INTO {config['schema']}.global_props (check_in, start_block) \
+                    VALUES (NULL, {config['start_block']});")
             db.do('commit')
     
     @classmethod
     def _prepare_data(cls, db):
         has_prepped = db.do('select', f"SELECT * FROM {config['schema']}.pairs;")
         if not has_prepped:
-            db.do('execute',f"INSERT INTO {config['schema']}.pairs VALUES ('HIVE_HBD', 'HIVE', 'HBD')")
+            db.do('execute',
+                f"INSERT INTO {config['schema']}.pairs VALUES ('HIVE_HBD', 'HIVE', 'HBD')")
             db.do('commit')
     
     @classmethod
@@ -61,9 +64,11 @@ class Haf:
     def _cleanup(cls, db):
         """Stops any running sync procedures from previous instances."""
         try:
-            running = db.do('select_one', f"SELECT {config['schema']}.is_sync_running('{config['schema']}-main');")
+            running = db.do('select_one',
+                f"SELECT {config['schema']}.is_sync_running('{config['schema']}-main');")
             if running is True:
-                db.do('execute', f"SELECT {config['schema']}.terminate_main_sync('{config['schema']}-main');")
+                db.do('execute',
+                f"SELECT {config['schema']}.terminate_main_sync('{config['schema']}-main');")
         except:
             pass
         if config['reset'] == 'true':
