@@ -48,12 +48,12 @@ class DbSession:
 
     def do(self, query_type, sql='', data=None):
         try:
-            self._process(query_type=query_type, sql=sql, data=data)
+            return self._process(query_type=query_type, sql=sql, data=data)
         except psycopg2.OperationalError as err:
             if "connection" in err.args[0] and "closed" in err.args[0]:
                 print(f"Connection lost. Reconnecting...")
                 self.new_conn()
-                self._process(query_type=query_type, sql=sql, data=data)
+                return self._process(query_type=query_type, sql=sql, data=data)
             else:
                 raise Exception(err)
 
