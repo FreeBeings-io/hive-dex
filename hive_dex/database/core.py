@@ -32,35 +32,30 @@ class DbSession:
                 print(e)
                 os._exit(1)
     
+    def _process(self, query_type, sql='', data=None):
+        if query_type == 'select':
+            return self._select(sql)
+        elif query_type == 'select_one':
+            return self._select_one(sql)
+        elif query_type == 'select_exists':
+            return self._select_exists(sql)
+        elif query_type == 'execute':
+            self._execute(sql, data)
+        elif query_type == 'commit':
+            self._commit()
+        else:
+            raise Exception(f"Invalid query type passed: {query_type}")
+
     def do(self, query_type, sql='', data=None):
-        err_count = 0
-        while True:
-            try:
-                if query_type == 'select':
-                    return self._select(sql)
-                elif query_type == 'select_one':
-                    return self._select_one(sql)
-                elif query_type == 'select_exists':
-                    return self._select_exists(sql)
-                elif query_type == 'execute':
-                    self._execute(sql, data)
-                    break
-                elif query_type == 'commit':
-                    self._commit()
-                    break
-                else:
-                    raise Exception(f"Invalid query type passed: {query_type}")
-            except psycopg2.OperationalError as err:
-                if "connection" in err.args[0] and "closed" in err.args[0]:
-                    print(f"Connection lost. Reconnecting...")
-                    self.new_conn()
-                else:
-                    print(err)
-                    print(sql)
-                    print(data)
-                    err_count += 1
-                    if err_count == 10:
-                        break
+        try:
+            self._process(query_type=query_type, sql=sql, data=data)
+        except psycopg2.OperationalError as err:
+            if "connection" in err.args[0] and "closed" in err.args[0]:
+                print(f"Connection lost. Reconnecting...")
+                self.new_conn()
+                self._process(query_type=query_type, sql=sql, data=data)
+            else:
+                raise Exception(err)
 
     def _select(self, sql):
         cur = self.conn.cursor()
