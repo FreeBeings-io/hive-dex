@@ -115,9 +115,13 @@ CREATE OR REPLACE FUNCTION hive_dex.limit_order_cancelled_operation( _block_num 
     VOLATILE AS $function$
         DECLARE
             _acc VARCHAR(16);
+            _order_id BIGINT;
         BEGIN
             _acc := _data->'value'->>'seller';
-            -- TODO: investigate future use
+            _order_id := _data->'value'->'orderid';
+
+            DELETE FROM hive_dex.orders WHERE acc = _acc AND order_id = _order_id;
+
         END;
     $function$;
 
