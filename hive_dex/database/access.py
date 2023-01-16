@@ -12,8 +12,7 @@ def select(sql:str, schema:list, one:bool = False):
     res = []
     if _res:
         assert len(schema) == len(_res[0]), 'invalid schema'
-        for x in _res:
-            res.append(populate_by_schema(x,schema))
+        res = populate_by_schema(_res, schema)
         if one:
             return normalize_types(res)[0]
         else:
