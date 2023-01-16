@@ -35,5 +35,9 @@ TAGS_METADATA = [
     {
         "name": "tickers",
         "description": "Current tickers."
+    },
+    {
+        "name": "historical_trades",
+        "description": "Historical trades"
     }
 ]

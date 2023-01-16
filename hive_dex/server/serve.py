@@ -8,6 +8,7 @@ from hive_dex.server.buffer import Buffer
 from hive_dex.server.endpoints.pairs import router_pairs
 from hive_dex.server.endpoints.orderbook import router_orderbook
 from hive_dex.server.endpoints.tickers import router_tickers
+from hive_dex.server.endpoints.historical import router_historical
 from hive_dex.server.status import SystemStatus
 from hive_dex.server.api_metadata import TITLE, DESCRIPTION, VERSION, CONTACT, LICENSE, TAGS_METADATA
 
@@ -33,9 +34,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router_pairs)
-app.include_router(router_orderbook)
-app.include_router(router_tickers)
 
 async def root(request: Request):
     """Reports the status of Hive DEX API."""
@@ -49,9 +47,11 @@ async def root(request: Request):
     Buffer.update_buffer(request['path'], report)
     return add_server_metadata(report)
 
-# SYSTEM
-
 app.add_api_route("/api", root, tags=["system"], methods=["GET"], summary="System status")
+app.include_router(router_pairs)
+app.include_router(router_orderbook)
+app.include_router(router_tickers)
+app.include_router(router_historical)
 
 def run_server():
     """Run server."""
