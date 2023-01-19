@@ -49,3 +49,10 @@ def add_server_metadata(data:dict):
     data['timezone'] = 'UTC'
     data['server_time'] = datetime.strftime(datetime.utcnow(), UTC_TIMESTAMP_FORMAT)
     return data
+
+def check_timestamp_format(data:str):
+    try:
+        result = datetime.strptime(data, UTC_TIMESTAMP_FORMAT)
+        return True
+    except:
+        return False
