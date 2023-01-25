@@ -155,9 +155,9 @@ CREATE OR REPLACE FUNCTION hive_dex.fill_order_operation( _block_num INTEGER, _b
             _open_nai := _data->'value'->'open_pays'->>'nai';
 
             IF _current_nai = '@@000000013' THEN
-                _price := round((_current_amount::numeric/_open_amount::numeric)::numeric, 6);
+                _price := trunc((_current_amount::numeric/_open_amount::numeric)::numeric, 6);
             ELSIF _current_nai = '@@000000021' THEN
-                _price := round((_open_amount::numeric/_current_amount::numeric)::numeric, 6);
+                _price := trunc((_open_amount::numeric/_current_amount::numeric)::numeric, 6);
             END IF;
 
             -- current

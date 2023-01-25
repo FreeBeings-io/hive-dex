@@ -17,19 +17,19 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
         BEGIN
             SELECT * INTO temprow FROM hive_dex.trades ORDER BY id DESC LIMIT 1;
             IF temprow.current_nai = '@@000000013' THEN
-                _last_price := round((temprow.current_amount::numeric / temprow.open_amount::numeric)::numeric, 6);
+                _last_price := trunc((temprow.current_amount::numeric / temprow.open_amount::numeric)::numeric, 6);
             ELSIF temprow.current_nai = '@@000000021' THEN
-                _last_price := round((temprow.open_amount::numeric / temprow.current_amount::numeric)::numeric, 6);
+                _last_price := trunc((temprow.open_amount::numeric / temprow.current_amount::numeric)::numeric, 6);
             END IF;
             _block_num_yest := (hive.app_get_irreversible_block()) - (1 * 24 * 60 * 20);
             -- hbd vol
-            SELECT ROUND(SUM(current_amount)/1000::numeric,3) hbd
+            SELECT TRUNC(SUM(current_amount)/1000::numeric,3) hbd
             INTO _quote_volume
             FROM hive_dex.trades
             WHERE current_nai = '@@000000013'
                 AND block_num >= _block_num_yest;
             -- hive vol
-            SELECT ROUND(SUM(current_amount)/1000::numeric,3) hive
+            SELECT TRUNC(SUM(current_amount)/1000::numeric,3) hive
             INTO _base_volume
             FROM hive_dex.trades
             WHERE current_nai = '@@000000021'
@@ -37,7 +37,7 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             -- bid
             SELECT
                 (
-                    round((pays::numeric/receives::numeric)::numeric, 6)
+                    trunc((pays::numeric/receives::numeric)::numeric, 6)
                 )::varchar price
             INTO _best_bid
             FROM hive_dex.orders
@@ -50,7 +50,7 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             -- ask
             SELECT
                 (
-                    round((receives::numeric/pays::numeric)::numeric, 6)
+                    trunc((receives::numeric/pays::numeric)::numeric, 6)
                 )::varchar price
             INTO _best_ask
             FROM hive_dex.orders
@@ -61,10 +61,12 @@ CREATE OR REPLACE FUNCTION hive_dex.query_get_last_trade()
             ORDER BY price ASC
             LIMIT 1;
             -- high/low
-            SELECT ROUND(MAX(price),6) high, ROUND(MIN(price),6) low
+            SELECT TRUNC(MAX(price),6) high, TRUNC(MIN(price),6) low
             INTO _high_price, _low_price
             FROM hive_dex.trades
-            WHERE block_num >= _block_num_yest;
+            WHERE block_num >= _block_num_yest
+            AND open_amount > 1
+            AND current_amount > 1;
             RETURN jsonb_build_object(
                 'last_price',_last_price,
                 'base_volume',_base_volume,

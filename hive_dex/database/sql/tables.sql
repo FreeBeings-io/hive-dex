@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS hive_dex.trades(
     current_amount BIGINT,
     current_nai VARCHAR(11),
     open_owner VARCHAR(16),
-    open_amount FLOAT,
+    open_amount BIGINT,
     open_nai VARCHAR(11),
     price NUMERIC
 );
