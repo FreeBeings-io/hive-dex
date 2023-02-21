@@ -86,7 +86,7 @@ CREATE OR REPLACE PROCEDURE hive_dex.sync_main()
                                 ov.timestamp,
                                 ov.trx_in_block,
                                 tv.trx_hash,
-                                ov.body::json
+                                ov.body::varchar::json
                             FROM hive.operations_view ov
                             JOIN hive.transactions_view tv
                                 ON tv.block_num = ov.block_num
