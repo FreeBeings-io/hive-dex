@@ -8,7 +8,7 @@ assert sys.version_info[0] == 3 and sys.version_info[1] >= 10, \
 
 setup(
     name='hive_dex',
-    version='0.2.1',
+    version='1.0.0',
     description="Market data for the Hive blockchain's internal decentralized exchange.",
     long_description=open('README.md', 'r', encoding='UTF-8').read(),
     packages=find_packages(exclude=['scripts']),
